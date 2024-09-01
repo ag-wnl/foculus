@@ -1,5 +1,5 @@
 import { ChatInput } from "@/components/Chat";
-import { MessageBox } from "@/components/MessageBox";
+import { ChatContainer } from "@/components/MessageBox";
 import { currentUser } from "@clerk/nextjs/server";
 
 export default async function ChatPage() {
@@ -9,10 +9,8 @@ export default async function ChatPage() {
       <div className="text-[2rem] font-medium">Hi {user?.firstName}!</div>
 
       {/* Text Messages */}
-      <div className="w-full flex flex-col gap-6">
-        <MessageBox text="something lol" />
-        <MessageBox text="Hey wassup" />
-        <MessageBox text="Ok im doing something" />
+      <div className="w-full flex flex-col">
+        <ChatContainer />
       </div>
 
       <footer className="max-lg:w-[calc(100%-2rem)] lg:w-[calc(100%-8rem)] fixed bottom-4">

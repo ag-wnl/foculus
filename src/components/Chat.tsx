@@ -1,11 +1,35 @@
-'use client'
+"use client";
 import { useState } from "react";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
 import { DoubleArrowUpIcon } from "@radix-ui/react-icons";
+import { recentChats } from "@/atoms/state";
+import { useAtom } from "jotai";
+
+/**
+ * 
+ * @param data 
+ * @returns Demo return format looks like : 
+ * {
+    "sequence": "I had a lot of fun today!\n",
+    "labels": [
+        "study",
+        "health",
+        "programming"
+    ],
+    "scores": [
+        0.3636765778064728,
+        0.34209975600242615,
+        0.2942236661911011
+    ]
+* }
+ */
 
 async function query(data: string) {
-  const queryInputFormat = {"inputs": data, "parameters": {"candidate_labels": ["programming", "study", "health"]}}
+  const queryInputFormat = {
+    inputs: data,
+    parameters: { candidate_labels: ["programming", "study", "health"] },
+  };
 
   const response = await fetch("/api/query", {
     headers: {
@@ -16,19 +40,32 @@ async function query(data: string) {
   });
 
   const result = await response.json();
-  console.log("model result - ", result)
+  console.log("model result - ", result);
   return result;
 }
 
 export function ChatInput() {
+  const [msgQuery, setMessageQuery] = useState<string | null>();
+  const [chats, setChats] = useAtom(recentChats);
 
-  const [msgQuery, setMessageQuery] = useState<string | null> ();
+  // Only store 5 most recent chats:
+  const handleMsgSend = (msg: string) => {
+    if (msg === "" || !msg) {
+      return;
+    }
+
+    if (chats.length < 5) {
+      setChats([...chats, msg]);
+    } else {
+      setChats([...chats.slice(-4), msg]);
+    }
+  };
 
   return (
     <div className="relative w-full flex">
       <Textarea
         placeholder="Type your message here."
-        className="w-full pr-16"  
+        className="w-full pr-16"
         value={msgQuery || ""}
         onChange={(e) => setMessageQuery(e.target.value)}
       />
@@ -40,11 +77,12 @@ export function ChatInput() {
           if (msgQuery) {
             query(msgQuery);
             setMessageQuery("");
+            handleMsgSend(msgQuery);
           }
         }}
       >
         <DoubleArrowUpIcon />
       </Button>
     </div>
-  )
+  );
 }
